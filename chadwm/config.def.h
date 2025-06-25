@@ -34,13 +34,19 @@ static const char *mutevol[] = { "/usr/bin/pactl", "set-sink-mute",   "0", "togg
 static const char *light_up[] = {"/usr/bin/light", "-A", "5", NULL};
 static const char *light_down[] = {"/usr/bin/light", "-U", "5", NULL};
 static const int new_window_attach_on_end = 0; /*  1 means the new window will attach on the end; 0 means the new window will attach on the front,default is front */
+static const char dmenufont[]       = "jetbrains-nerd-mono:size=12";
+static const char col_black[]       = "#040404";
+static const char col_gray1[]       = "#a1a1a1";
+static const char col_gray2[]       = "#595959";
+static const char col_orange[]       = "#f59542";
+static const char col_cyan[]        = "#4d566b";
 #define ICONSIZE 19   /* icon size */
 #define ICONSPACING 8 /* space between icon and title */
 
 static const char *fonts[]          = {"Iosevka:style:medium:size=12" ,"JetBrainsMono Nerd Font Mono:style:medium:size=19" };
 
 // theme
-#include "themes/onedark.h"
+#include "themes/catppuccin.h"
 
 static const char *colors[][3]      = {
     /*                     fg       bg      border */
@@ -89,6 +95,7 @@ static const Rule rules[] = {
     { "Gimp",     NULL,       NULL,       0,            0,           1,           -1 },
     { "Firefox",  NULL,       NULL,       1 << 8,       0,           0,           -1 },
     { "eww",      NULL,       NULL,       0,            0,           1,           -1 },
+    {"Flameshot", NULL, NULL, 1 << 0, 0, -1}
 };
 
 /* layout(s) */
@@ -132,6 +139,11 @@ static const Layout layouts[] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
+static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
+static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_black, "-nf", col_gray1, "-sb", col_cyan, "-sf", col_black, NULL };
+static const char *termcmd[]  = { "st", NULL };
+static const char *flameshotcmd[] = {"/bin/sh", "-c", "flameshot gui & disown", NULL};
+
 
 static const Key keys[] = {
     /* modifier                         key         function        argument */
@@ -152,6 +164,8 @@ static const Key keys[] = {
     { MODKEY,                           XK_c,       spawn,          SHCMD("rofi -show drun") },
     { MODKEY,                           XK_Return,  spawn,          SHCMD("st")},
 
+	{ MODKEY,                       XK_s,      spawn,          {.v = dmenucmd } },
+    { 0, XK_Print, spawn, {.v = flameshotcmd} },
     // toggle stuff
     { MODKEY,                           XK_b,       togglebar,      {0} },
     { MODKEY|ControlMask,               XK_t,       togglegaps,     {0} },
@@ -187,7 +201,7 @@ static const Key keys[] = {
 
     // inner gaps
     { MODKEY|ShiftMask,                 XK_i,       incrigaps,      {.i = +1 } },
-    { MODKEY|ControlMask|ShiftMask,     XK_i,       incrigaps,      {.i = -1 } },
+    { MODKEY|ShiftMask,     XK_d,       incrigaps,      {.i = -1 } },
 
     // outer gaps
     { MODKEY|ControlMask,               XK_o,       incrogaps,      {.i = +1 } },
@@ -233,7 +247,7 @@ static const Key keys[] = {
     { MODKEY,                           XK_q,       killclient,     {0} },
 
     // restart
-    { MODKEY|ShiftMask,                 XK_r,       restart,           {0} },
+    { MODKEY|ShiftMask,                 XK_q,       restart,           {0} },
 
     // hide & restore windows
     { MODKEY,                           XK_e,       hidewin,        {0} },
